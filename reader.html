@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1E1B2E">
+  <meta name="description" content="Brainrot your way through books">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Reader — Rot n Read</title>
+  <link rel="icon" href="images/alt-logo/logo.alt.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="images/logo/icon-192x192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app" class="reader" data-layout="immersive">
+
+    <header class="reader__top-bar">
+      <a href="home.html" class="reader__back-btn">
+        <img src="images/icons/back.svg" alt="Back" class="reader__back-icon">
+      </a>
+      <span class="reader__book-title">Book Title</span>
+    </header>
+
+    <main class="reader__content">
+      <div class="reader__video-area">
+        <video class="reader__video reader__video--primary" muted loop playsinline></video>
+        <video class="reader__video reader__video--secondary" muted loop playsinline></video>
+        <div class="reader__overlay"></div>
+      </div>
+
+      <div class="reader__text-area">
+        <p class="reader__text-chunk">The quick brown fox jumps over the lazy dog and runs into the forest</p>
+      </div>
+    </main>
+
+    <button class="reader__reset-btn" id="reset-btn">
+      <img src="images/icons/reset.svg" alt="Reset" class="reader__reset-icon">
+    </button>
+
+    <button class="reader__fullscreen-btn" id="fullscreen-btn">
+      <img src="images/icons/fullscreen.svg" alt="Fullscreen" class="reader__fullscreen-icon">
+    </button>
+
+    <div class="reader__controls">
+      <div class="reader__speed" id="speed-control">
+        <button class="reader__speed-btn" id="speed-dec">−</button>
+        <span class="reader__speed-value" id="speed-value">1x</span>
+        <button class="reader__speed-btn" id="speed-inc">+</button>
+      </div>
+      <div class="reader__progress-bar">
+        <div class="reader__progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <nav class="reader__nav">
+        <button class="reader__nav-btn reader__nav-btn--side" id="rewind-btn">
+          <img src="images/icons/rewind.svg" alt="Rewind 5s" class="reader__nav-icon">
+        </button>
+        <button class="reader__nav-btn reader__nav-btn--center" id="play-pause-btn">
+          <img src="images/icons/play.svg" alt="Play" class="reader__nav-icon reader__nav-icon--center">
+        </button>
+        <button class="reader__nav-btn reader__nav-btn--side" id="forward-btn">
+          <img src="images/icons/forward.svg" alt="Forward 5s" class="reader__nav-icon">
+        </button>
+      </nav>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay hidden" id="reset-modal">
+    <div class="modal">
+      <p class="modal__text">Reset progress to the beginning?</p>
+      <div class="modal__actions">
+        <button class="modal__btn modal__btn--cancel" id="reset-cancel">Cancel</button>
+        <button class="modal__btn modal__btn--confirm" id="reset-confirm">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/video.js"></script>
+  <script src="js/reader.js"></script>
+</body>
+</html>

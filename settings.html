@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1E1B2E">
+  <meta name="description" content="Brainrot your way through books">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Settings — Rot n Read</title>
+  <link rel="icon" href="images/alt-logo/logo.alt.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="images/logo/icon-192x192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <img src="images/logo/watermark.svg" alt="" class="watermark">
+
+    <header class="header">
+      <h1 class="header__title">Settings</h1>
+    </header>
+
+    <main class="main settings">
+      <section class="settings__section">
+        <h2 class="settings__section-title">Display</h2>
+
+        <div class="settings__group">
+          <label class="settings__label">Theme</label>
+          <div class="pill-toggle" data-setting="theme">
+            <button class="pill-toggle__btn pill-toggle__btn--active" data-value="dark">Dark</button>
+            <button class="pill-toggle__btn" data-value="light">Light</button>
+            <button class="pill-toggle__btn" data-value="auto">Auto</button>
+          </div>
+        </div>
+
+        <div class="settings__group">
+          <label class="settings__label">Orientation</label>
+          <div class="pill-toggle" data-setting="orientation">
+            <button class="pill-toggle__btn" data-value="portrait">Portrait</button>
+            <button class="pill-toggle__btn" data-value="landscape">Landscape</button>
+            <button class="pill-toggle__btn pill-toggle__btn--active" data-value="auto">Auto</button>
+          </div>
+        </div>
+
+        <div class="settings__group">
+          <label class="settings__label">Layout</label>
+          <div class="layout-picker" data-setting="layout">
+            <button class="layout-picker__item layout-picker__item--active" data-value="immersive">
+              <div class="layout-picker__preview layout-picker__preview--immersive"><span class="layout-picker__text-label layout-picker__text-label--center">Text</span></div>
+              <span>Immersive</span>
+            </button>
+            <button class="layout-picker__item" data-value="split-primary">
+              <div class="layout-picker__preview layout-picker__preview--split-primary"><span class="layout-picker__text-label layout-picker__text-label--top">Text</span></div>
+              <span>Primary</span>
+            </button>
+            <button class="layout-picker__item" data-value="split-secondary">
+              <div class="layout-picker__preview layout-picker__preview--split-secondary"><span class="layout-picker__text-label layout-picker__text-label--bottom">Text</span></div>
+              <span>Secondary</span>
+            </button>
+            <button class="layout-picker__item" data-value="ultra">
+              <div class="layout-picker__preview layout-picker__preview--ultra"><span class="layout-picker__text-label layout-picker__text-label--center">Text</span></div>
+              <span>Ultra Brainrot</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings__group">
+          <label class="settings__label">Overlay Opacity</label>
+          <div class="slider-control">
+            <input type="range" class="slider-control__input" id="overlay-opacity" min="0" max="100" value="40">
+            <span class="slider-control__value" id="overlay-opacity-value">40%</span>
+          </div>
+        </div>
+
+        <div class="settings__group">
+          <label class="settings__label">Video</label>
+          <select class="settings__select" id="video-select">
+            <option value="mmm_fingers">Mmm Fingers</option>
+            <option value="subway_surfers">Subway Surfers</option>
+          </select>
+        </div>
+
+        <div class="settings__group settings__group--ultra-only hidden" id="video-secondary-group">
+          <label class="settings__label">Video (Secondary)</label>
+          <select class="settings__select" id="video-secondary-select">
+            <option value="subway_surfers">Subway Surfers</option>
+            <option value="mmm_fingers">Mmm Fingers</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="settings__section">
+        <h2 class="settings__section-title">Reading</h2>
+
+        <div class="settings__group">
+          <label class="settings__label">Pace</label>
+          <div class="stepper" data-setting="pace">
+            <button class="stepper__btn stepper__btn--dec">−</button>
+            <span class="stepper__value" id="pace-value">30</span>
+            <span class="stepper__unit">wpm</span>
+            <button class="stepper__btn stepper__btn--inc">+</button>
+          </div>
+        </div>
+
+        <div class="settings__group">
+          <label class="settings__label">Font</label>
+          <select class="settings__select" id="font-select">
+            <option value="system-ui">System Default</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Verdana">Verdana</option>
+            <option value="monospace">Monospace</option>
+          </select>
+        </div>
+
+        <div class="settings__group">
+          <label class="settings__label">Font Size</label>
+          <div class="slider-control">
+            <input type="range" class="slider-control__input" id="font-size" min="12" max="32" value="18">
+            <span class="slider-control__value" id="font-size-value">18px</span>
+          </div>
+        </div>
+
+        <div class="settings__group">
+          <label class="settings__label">Rows of Text</label>
+          <div class="stepper" data-setting="rows">
+            <button class="stepper__btn stepper__btn--dec">−</button>
+            <span class="stepper__value" id="rows-value">3</span>
+            <button class="stepper__btn stepper__btn--inc">+</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings__section">
+        <h2 class="settings__section-title">Offline</h2>
+
+        <div class="settings__group settings__group--col">
+          <label class="settings__label">Cache Videos for Offline</label>
+          <button class="settings__cache-btn" id="cache-all-btn">Download All Videos</button>
+          <span class="settings__hint" id="cache-status"></span>
+        </div>
+      </section>
+    </main>
+
+    <div class="bottom-nav__fade"></div>
+    <nav class="bottom-nav">
+      <a href="about.html" class="bottom-nav__item bottom-nav__item--side">
+        <img src="images/icons/info.svg" alt="About" class="bottom-nav__icon">
+      </a>
+      <a href="home.html" class="bottom-nav__item bottom-nav__item--center">
+        <img src="images/icons/home.svg" alt="Home" class="bottom-nav__icon bottom-nav__icon--center">
+      </a>
+      <a href="javascript:void(0)" class="bottom-nav__item bottom-nav__item--side bottom-nav__item--active">
+        <img src="images/icons/settings.svg" alt="Settings" class="bottom-nav__icon">
+      </a>
+    </nav>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>
