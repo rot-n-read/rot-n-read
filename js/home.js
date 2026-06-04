@@ -30,6 +30,7 @@ function trigger_file_picker() {
 }
 
 function handle_pdf_upload(file) {
+  show_loading();
   var reader = new FileReader();
   reader.onload = function () {
     var buffer = reader.result;
@@ -51,13 +52,25 @@ function handle_pdf_upload(file) {
 
       save_book(book).then(function () {
         render_book_card(book);
+        hide_loading();
       });
     }).catch(function (err) {
       console.error("PDF parse error:", err);
+      hide_loading();
       alert("Failed to parse PDF. Make sure it's a text-based PDF.");
     });
   };
   reader.readAsArrayBuffer(file);
+}
+
+function show_loading() {
+  var overlay = document.getElementById("loading-overlay");
+  if (overlay) overlay.classList.remove("hidden");
+}
+
+function hide_loading() {
+  var overlay = document.getElementById("loading-overlay");
+  if (overlay) overlay.classList.add("hidden");
 }
 
 function strip_pdf_extension(filename) {

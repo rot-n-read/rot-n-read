@@ -30,7 +30,7 @@ A speed-reading PWA for the brainrot generation. Upload a PDF, set your pace, an
 
 ### Users
 
-1. Open [https://rot-n-read.example.com](https://rot-n-read.example.com) on your phone.
+1. Open [rot-n-read.github.io](https://rot-n-read.github.io/rot-n-read/home.html) on your phone.
 2. Tap the **⋮** (three dots) menu in your browser.
 3. Tap **"Add to Home Screen"** or **"Install App"**.
 4. Open the app from your home screen — it runs fullscreen, no browser UI.

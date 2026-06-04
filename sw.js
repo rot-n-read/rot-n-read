@@ -1,4 +1,4 @@
-const CACHE_NAME = "rot-n-read-0.8.32";
+const CACHE_NAME = "rot-n-read-1.0.0";
 const PRECACHE_URLS = [
   "./",
   "./home.html",
