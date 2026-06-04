@@ -51,6 +51,16 @@ Open an issue with:
 - What you expected vs what happened
 - Screenshot if applicable
 
+## AI Assistance Policy
+
+This project was built with AI assistance (Claude). AI-assisted PRs are accepted and encouraged — but:
+
+You must manually review the code you submit. AI-generated code that is clearly unreviewed (nonsensical variable names, dead code, hallucinated imports) will be rejected.
+
+## Review Turnaround
+
+The maintainer is employed full-time. Pull requests are reviewed manually and with AI assistance, typically on weekends only. Please be patient — your contribution is appreciated.
+
 ## Code of Conduct
 
-Don't be a dick. That's it. Be respectful, be helpful, have fun.
+Be respectful, be helpful, have fun. That's it.
