@@ -1,10 +1,10 @@
-# Rot n Read
+# Rot n Read - v1.0
 
-> Brainrot your way through books.
+<img src="images/logo/icon-512x512.png" alt="Rot n Read logo" width="128" align="left" style="margin-right: 16px;">
+
+`Brainrot your way through books.`
 
 A speed-reading PWA for the brainrot generation. Upload a PDF, set your pace, and watch the text stream across your screen while familiar dopamine-bait videos loop in the background. It won't fix your attention span, but it'll trick your brain into finishing a book.
-
-**v1.0.0**
 
 ## Screenshots
 
