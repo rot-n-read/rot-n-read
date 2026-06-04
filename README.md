@@ -6,6 +6,14 @@ A speed-reading PWA for the brainrot generation. Upload a PDF, set your pace, an
 
 **v1.0.0**
 
+## Screenshots
+
+<p align="center">
+    <img src="images/screenshots/3.png" alt="Home page and Zen mode in portrait" width="30%">
+    <img src="images/screenshots/2.png" alt="Reader page and Settings page in portrait" width="30%">
+    <img src="images/screenshots/1.png" alt="Ultra Brainrot mode and Primary layout in landscape" width="31%">
+</p>
+
 ## Features
 
 - **PDF Upload & Parsing** — Drop in a text-based PDF, get a readable book in seconds. Headers/footers stripped automatically.
