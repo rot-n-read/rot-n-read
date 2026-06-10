@@ -7,7 +7,9 @@ function init_settings() {
   init_steppers();
   init_font_select();
   init_video_selects();
+  init_tts_settings();
   init_cache_button();
+  init_update_button();
 }
 
 function init_pill_toggles() {
@@ -24,6 +26,8 @@ function init_pill_toggles() {
           apply_theme(value);
         } else if (setting === "orientation") {
           apply_orientation(value);
+        } else if (setting === "tts_enabled") {
+          apply_tts_enabled(value === "true");
         }
       });
     });
@@ -152,7 +156,7 @@ function setup_slider(input_id, display_id, unit, storage_key) {
 
 function init_steppers() {
   setup_stepper("pace-value", 10, 300, 5);
-  setup_stepper("rows-value", 1, 6, 1);
+  setup_stepper("rows-value", 1, 10, 1);
 }
 
 function setup_stepper(value_id, min, max, step) {
@@ -228,6 +232,80 @@ function toggle_secondary_video_group(layout) {
   }
 }
 
+function init_tts_settings() {
+  var section = document.getElementById("tts-section");
+  if (!("speechSynthesis" in window)) {
+    if (section) section.classList.add("hidden");
+    return;
+  }
+
+  var saved_enabled = localStorage.getItem("tts_enabled") === "true";
+  var saved_voice = localStorage.getItem("tts_voice") || "";
+
+  var toggle = document.querySelector('[data-setting="tts_enabled"]');
+  if (toggle) {
+    var btns = toggle.querySelectorAll(".pill-toggle__btn");
+    btns.forEach(function (b) {
+      b.classList.remove("pill-toggle__btn--active");
+      if ((b.getAttribute("data-value") === "true") === saved_enabled) {
+        b.classList.add("pill-toggle__btn--active");
+      }
+    });
+  }
+
+  apply_tts_enabled(saved_enabled);
+  populate_voice_select(saved_voice);
+
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.addEventListener("voiceschanged", function () {
+      var current = localStorage.getItem("tts_voice") || "";
+      populate_voice_select(current);
+    });
+  }
+}
+
+function apply_tts_enabled(enabled) {
+  localStorage.setItem("tts_enabled", enabled ? "true" : "false");
+  var voice_group = document.getElementById("tts-voice-group");
+  if (voice_group) {
+    if (enabled) {
+      voice_group.classList.remove("hidden");
+    } else {
+      voice_group.classList.add("hidden");
+    }
+  }
+}
+
+function populate_voice_select(saved_voice) {
+  var select = document.getElementById("tts-voice-select");
+  if (!select) return;
+
+  var voices = speechSynthesis.getVoices();
+  select.innerHTML = "";
+
+  var default_opt = document.createElement("option");
+  default_opt.value = "";
+  default_opt.textContent = "Default";
+  select.appendChild(default_opt);
+
+  voices.forEach(function (voice) {
+    var opt = document.createElement("option");
+    opt.value = voice.name;
+    opt.textContent = voice.name + " (" + voice.lang + ")";
+    select.appendChild(opt);
+  });
+
+  select.value = saved_voice;
+
+  select.removeEventListener("change", on_voice_change);
+  select.addEventListener("change", on_voice_change);
+}
+
+function on_voice_change() {
+  var select = document.getElementById("tts-voice-select");
+  if (select) localStorage.setItem("tts_voice", select.value);
+}
+
 var VIDEO_CACHE_URLS = [
   "./videos/mmm_fingers/1.mp4",
   "./videos/subway_surfers/1.mp4",
@@ -278,6 +356,56 @@ function check_cache_status(status_el) {
       status_el.textContent = "All videos cached for offline use";
     }
   });
+}
+
+function init_update_button() {
+  var btn = document.getElementById("update-btn");
+  if (!btn) return;
+  btn.addEventListener("click", function () { check_for_updates(btn); });
+}
+
+function check_for_updates(btn) {
+  if (!("serviceWorker" in navigator)) {
+    btn.textContent = "Not supported";
+    return;
+  }
+
+  btn.textContent = "Checking...";
+  btn.disabled = true;
+
+  navigator.serviceWorker.addEventListener("controllerchange", function () {
+    window.location.reload();
+  });
+
+  navigator.serviceWorker.getRegistration().then(function (reg) {
+    if (!reg) {
+      show_update_status(btn, "Not installed");
+      return;
+    }
+
+    var update_found = false;
+
+    reg.addEventListener("updatefound", function () {
+      update_found = true;
+      btn.textContent = "Updating...";
+    });
+
+    reg.update().then(function () {
+      if (!update_found && !reg.installing && !reg.waiting) {
+        show_update_status(btn, "Already up to date");
+      }
+    }).catch(function () {
+      show_update_status(btn, "Check failed");
+    });
+  });
+}
+
+function show_update_status(btn, msg) {
+  btn.textContent = msg;
+  btn.disabled = false;
+  setTimeout(function () {
+    btn.textContent = "Check for updates";
+  }, 3000);
 }
 
 document.addEventListener("DOMContentLoaded", init_settings);

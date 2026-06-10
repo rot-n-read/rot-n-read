@@ -1,4 +1,4 @@
-# Rot n Read - v1.0
+# Rot n Read - v1.2
 
 <img src="images/logo/icon-512x512.png" alt="Rot n Read logo" width="128" align="left" style="margin-right: 16px;">
 
@@ -19,12 +19,19 @@ A speed-reading PWA for the brainrot generation. Upload a PDF, set your pace, an
 - **PDF Upload & Parsing** — Drop in a text-based PDF, get a readable book in seconds. Headers/footers stripped automatically.
 - **Adaptive Text Engine** — Text chunks are built at read time based on your screen width, font, font size, and rows setting. Rotate your phone? It re-chunks instantly.
 - **Playback Controls** — Play, pause, rewind, forward, speed adjustment (0.5×–2×). Reading pace in WPM.
+- **Built-in TTS** — Web Speech API narration is available and integrated in the reader.
 - **Background Videos** — Subway Surfers, Mmm Fingers, or whatever keeps your lizard brain happy. Loops silently behind the text.
 - **4 Layout Modes** — Immersive (text over video), Primary (text top), Secondary (text bottom), Ultra Brainrot (two videos simultaneously).
 - **Zen Mode** — One tap hides all UI. Tap again to bring it back.
 - **Per-Book Settings** — Skip characters, custom titles, cover colors.
 - **Offline-First PWA** — Installable, service worker caches everything, optional button to download all videos for full offline use.
 - **Smart Sentence Splitting** — Handles abbreviations (Mr., Dr., etc.), decimals, ellipses. 30% rule prevents awkward sentence fragments at chunk boundaries.
+
+## TTS Status
+
+Text-to-speech is complete and available in-app using the browser's Web Speech API. Voice quality still depends on the OS/browser voice packs, so some voices may sound robotic.
+
+If you can help improve natural voice quality (while staying lightweight and free), contributions are welcome.
 
 ## Getting Started
 

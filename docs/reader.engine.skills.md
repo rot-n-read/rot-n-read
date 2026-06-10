@@ -19,29 +19,50 @@ This value changes between portrait and landscape — recalculate on orientation
 
 ### Build chunks from sentences
 
-Fill lines word-by-word up to `max_chars_per_line` characters, breaking only at word boundaries. Number of lines per chunk = user's **rows** setting.
+The **rows** setting is a maximum cap, not an exact target. Each chunk contains one or more complete sentences, packed greedily until adding the next sentence would exceed `max_rows`.
+
+**Algorithm:**
+
+1. Start an empty chunk.
+2. Take the next sentence (or sentence fragment from a previous break).
+3. Simulate laying out `chunk_text + sentence` word-by-word and count the rows needed.
+4. If it fits within `max_rows` → add the sentence to the chunk; continue to step 2 for the next sentence.
+5. If it doesn't fit and the chunk already has content → emit the chunk; the current sentence starts the next chunk.
+6. If it doesn't fit and the chunk is empty (single sentence exceeds `max_rows`) → find the last **natural break point** within the sentence that fits, break there, emit that fragment as the chunk.
+
+**Natural break points** (in priority order, last-fitting wins):
+- After a comma, semicolon, em-dash, or en-dash (break after the punctuation)
+- Before a coordinating or subordinating conjunction at a word boundary: `and`, `but`, `or`, `yet`, `still`, `so`, `nor`, `for`, `although`, `while`, `because`, `since`, `if`, `when`, `however`, `though`, `unless`
+
+If no natural break fits, force-break at word boundary at `max_rows`.
 
 #### Example
 
 Settings: `max_chars_per_line = 50`, `rows = 3`
 
-Source text:
-> "of me that is completely different from Mother; the Betty that holds Subaru's hand is several hundreds times better than that, I suppose.Roswaal: That is what I'm refeeerring~ to."
+Sentences:
+1. `"It was a bright cold day in April."`  (6 rows if max_chars=10, fits in 1 row at 50)
+2. `"The clocks were striking thirteen."`
 
-Line 1: `of me that is completely different from Mother;` (47 chars — next word would overflow, wrap)
-Line 2: `the Betty that holds Subaru's hand is several` (46 chars)
-Line 3: `hundreds times better than that, I suppose.Roswaal` (50 chars)
-
-### 30% rule
-
-"Roswaal" is the start of a new sentence on the last line, and less than 30% of that sentence fits in this chunk → push it to the next chunk.
-
-Final chunk:
+Both sentences fit together within 3 rows → one chunk:
 ```
-of me that is completely different from Mother;
-the Betty that holds Subaru's hand is several
-hundreds times better than that, I suppose.
+It was a bright cold day in April. The clocks
+were striking thirteen.
 ```
+
+If sentence 2 were long enough to push past 3 rows, the chunk would end after sentence 1 alone.
+
+#### Long sentence break example
+
+Sentence: `"He walked to the store, and she stayed home, but nobody came back."`
+
+If this exceeds `max_rows` on its own, natural break positions are:
+- after `","` at "store," → `"He walked to the store,"`
+- before `"and"` → `"He walked to the store,"`  *(same region)*
+- after `","` at "home," → `"He walked to the store, and she stayed home,"`
+- before `"but"` → `"He walked to the store, and she stayed home,"`
+
+The last natural break that fits within `max_rows` is chosen.
 
 ## Timing
 
@@ -51,7 +72,11 @@ chunk_duration_ms = (word_count_in_chunk / wpm) × 60000 / speed_multiplier
 
 Example: 23 words, 100 WPM, 1× speed → `(23 / 100) × 60000 = 13,800ms`
 
-Display chunk → wait duration → display next chunk.
+Display chunk → wait duration (or TTS completion) → display next chunk.
+
+## TTS integration
+
+When TTS is enabled, each chunk is spoken as a single `SpeechSynthesisUtterance`. Because chunks are sentence-aligned (breaking only at natural pause points), the boundaries between utterances fall at natural speech pauses — commas, conjunctions, or sentence ends — minimising audible gaps.
 
 ## Orientation change / resize
 

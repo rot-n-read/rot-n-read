@@ -26,7 +26,7 @@ Thanks for wanting to help make brainrot reading slightly less degenerate.
 ### Priority Problems
 
 - **Reducing video file size** — Current MP4 clips are heavy. We'd love alternatives: looping CSS animations, HTML Canvas-based brainrot (bouncing balls, particle effects, etc.), or heavily compressed short loops. The goal is more brainrot content without bloating the app.
-- **Natural-sounding TTS** — The Web Speech API voices sound robotic. Help finding or integrating more human-sounding, natural language synthesis (without requiring paid APIs) would be huge.
+- **Natural-sounding TTS improvements** — TTS is now implemented using the Web Speech API. We still want more human-sounding voices and better voice selection/fallback behavior (without paid APIs or heavy dependencies).
 
 ### Other Ideas
 

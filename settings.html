@@ -69,7 +69,7 @@
         <div class="settings__group">
           <label class="settings__label">Overlay Opacity</label>
           <div class="slider-control">
-            <input type="range" class="slider-control__input" id="overlay-opacity" min="0" max="100" value="40">
+            <input type="range" class="slider-control__input" id="overlay-opacity" min="0" max="100" value="97">
             <span class="slider-control__value" id="overlay-opacity-value">40%</span>
           </div>
         </div>
@@ -98,7 +98,7 @@
           <label class="settings__label">Pace</label>
           <div class="stepper" data-setting="pace">
             <button class="stepper__btn stepper__btn--dec">−</button>
-            <span class="stepper__value" id="pace-value">30</span>
+            <span class="stepper__value" id="pace-value">150</span>
             <span class="stepper__unit">wpm</span>
             <button class="stepper__btn stepper__btn--inc">+</button>
           </div>
@@ -126,9 +126,26 @@
           <label class="settings__label">Rows of Text</label>
           <div class="stepper" data-setting="rows">
             <button class="stepper__btn stepper__btn--dec">−</button>
-            <span class="stepper__value" id="rows-value">3</span>
+            <span class="stepper__value" id="rows-value">6</span>
             <button class="stepper__btn stepper__btn--inc">+</button>
           </div>
+        </div>
+      </section>
+
+      <section class="settings__section" id="tts-section">
+        <h2 class="settings__section-title">Read Aloud</h2>
+
+        <div class="settings__group">
+          <label class="settings__label">Text-to-Speech</label>
+          <div class="pill-toggle" data-setting="tts_enabled">
+            <button class="pill-toggle__btn pill-toggle__btn--active" data-value="false">Off</button>
+            <button class="pill-toggle__btn" data-value="true">On</button>
+          </div>
+        </div>
+
+        <div class="settings__group hidden" id="tts-voice-group">
+          <label class="settings__label">Voice</label>
+          <select class="settings__select" id="tts-voice-select"></select>
         </div>
       </section>
 
@@ -139,6 +156,11 @@
           <label class="settings__label">Cache Videos for Offline</label>
           <button class="settings__cache-btn" id="cache-all-btn">Download All Videos</button>
           <span class="settings__hint" id="cache-status"></span>
+        </div>
+
+        <div class="settings__group settings__group--col">
+          <label class="settings__label">App Updates</label>
+          <button class="settings__cache-btn" id="update-btn">Check for updates</button>
         </div>
       </section>
     </main>

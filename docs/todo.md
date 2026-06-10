@@ -2,12 +2,12 @@
 
 ## 1 — TTS Integration
 
-- [ ] Web Speech API integration (speechSynthesis)
-- [ ] TTS reads current chunk aloud
-- [ ] Exact sync: next chunk only appears after speech completes (or timer fallback)
-- [ ] TTS voice picker (list available local voices)
-- [ ] TTS on/off toggle
-- [ ] Pace respects TTS — if speech takes longer than WPM timing, speech wins
+- [x] Web Speech API integration (speechSynthesis)
+- [x] TTS reads current chunk aloud
+- [x] Exact sync: next chunk only appears after speech completes (or timer fallback)
+- [x] TTS voice picker (list available local voices)
+- [x] TTS on/off toggle
+- [x] Pace respects TTS — if speech takes longer than WPM timing, speech wins
 
 ## 2 — Polish & Edge Cases
 

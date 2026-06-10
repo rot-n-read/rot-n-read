@@ -1,4 +1,4 @@
-const CACHE_NAME = "rot-n-read-1.0.0";
+const CACHE_NAME = "rot-n-read-1.2";
 const PRECACHE_URLS = [
   "./",
   "./home.html",
@@ -16,6 +16,7 @@ const PRECACHE_URLS = [
   "./js/pdf_handler.js",
   "./js/book_options.js",
   "./js/video.js",
+  "./js/tts.js",
   "./lib/pdfjs/pdf.min.js",
   "./lib/pdfjs/pdf.worker.min.js",
   "./manifest.json",

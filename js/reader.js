@@ -9,10 +9,10 @@ var reader_state = {
   total_words: 0,
   playing: false,
   timer: null,
-  wpm: 30,
+  wpm: 150,
   speed: 1,
   max_chars_line: 50,
-  rows: 3,
+  rows: 6,
   font: "system-ui",
   font_size: 18
 };
@@ -50,11 +50,12 @@ function load_reader_book(book_id) {
     reader_state.book = book;
     reader_state.sentences = filter_skip_chars(book.sentences || [], book.skip_chars || "");
     reader_state.word_offset = book.word_offset || 0;
-    reader_state.wpm = parseInt(localStorage.getItem("pace") || "30", 10);
-    reader_state.rows = parseInt(localStorage.getItem("rows") || "3", 10);
+    reader_state.wpm = parseInt(localStorage.getItem("pace") || "150", 10);
+    reader_state.rows = parseInt(localStorage.getItem("rows") || "6", 10);
     reader_state.font = localStorage.getItem("font") || "system-ui";
     reader_state.font_size = parseInt(localStorage.getItem("font_size") || "18", 10);
     reader_state.total_words = count_total_words(reader_state.sentences);
+    init_tts();
     compute_max_chars_line();
     build_chunks();
     seek_to_word_offset(reader_state.word_offset);
@@ -114,20 +115,16 @@ function build_chunks() {
 }
 
 function build_one_chunk(sentences, start_sentence, start_char_offset, max_chars, max_rows) {
-  var lines = [];
-  var current_line = "";
   var sentence_idx = start_sentence;
   var char_offset = start_char_offset;
+  var chunk_text = "";
   var word_count = 0;
-  var last_sentence_start_line = -1;
-  var last_sentence_word_count_in_chunk = 0;
-  var last_sentence_total_words = 0;
-  var last_sentence_idx = start_sentence;
-  var last_sentence_char_offset = start_char_offset;
 
-  while (sentence_idx < sentences.length && lines.length < max_rows) {
+  while (sentence_idx < sentences.length) {
     var sentence = sentences[sentence_idx];
-    var remaining = sentence.substring(char_offset);
+    var raw = sentence.substring(char_offset);
+    var leading_spaces = raw.match(/^\s*/)[0].length;
+    var remaining = raw.substring(leading_spaces).replace(/\s+$/, "");
 
     if (remaining.length === 0) {
       sentence_idx++;
@@ -135,93 +132,33 @@ function build_one_chunk(sentences, start_sentence, start_char_offset, max_chars
       continue;
     }
 
-    var is_new_sentence = (char_offset === 0 && (sentence_idx !== start_sentence || start_char_offset === 0));
-    if (is_new_sentence && lines.length > 0) {
-      last_sentence_start_line = lines.length;
-      if (current_line.length > 0) {
-        last_sentence_start_line = lines.length;
-      }
-      last_sentence_word_count_in_chunk = 0;
-      last_sentence_total_words = count_words_in_text(sentence);
-      last_sentence_idx = sentence_idx;
-      last_sentence_char_offset = 0;
-    }
+    var sep = chunk_text.length > 0 ? " " : "";
+    var candidate = chunk_text + sep + remaining;
 
-    while (remaining.length > 0 && lines.length < max_rows) {
-      var space_left = max_chars - current_line.length;
-
-      if (space_left <= 0) {
-        lines.push(current_line);
-        current_line = "";
-        space_left = max_chars;
-        if (lines.length >= max_rows) break;
-      }
-
-      var fit_result = fit_words_in_space(remaining, space_left);
-
-      if (fit_result.fitted.length === 0) {
-        if (current_line.length > 0) {
-          lines.push(current_line);
-          current_line = "";
-          if (lines.length >= max_rows) break;
-        } else {
-          var hard_break = hard_break_at(remaining, max_chars);
-          current_line = hard_break.fitted;
-          remaining = hard_break.rest;
-          char_offset = sentence.length - remaining.length;
-          word_count += count_words_in_text(hard_break.fitted);
-          if (is_new_sentence || last_sentence_start_line >= 0) {
-            last_sentence_word_count_in_chunk += count_words_in_text(hard_break.fitted);
-          }
-          lines.push(current_line);
-          current_line = "";
-          if (lines.length >= max_rows) break;
-          continue;
-        }
-      } else {
-        if (current_line.length > 0) {
-          current_line += fit_result.fitted;
-        } else {
-          current_line = fit_result.fitted;
-        }
-        remaining = fit_result.rest;
-        char_offset = sentence.length - remaining.length;
-        var fitted_words = count_words_in_text(fit_result.fitted);
-        word_count += fitted_words;
-        if (is_new_sentence || last_sentence_start_line >= 0) {
-          last_sentence_word_count_in_chunk += fitted_words;
-        }
-      }
-    }
-
-    if (lines.length >= max_rows) break;
-
-    if (remaining.length === 0) {
+    if (count_rows_for_text(candidate, max_chars) <= max_rows) {
+      chunk_text = candidate;
+      word_count += count_words_in_text(remaining);
       sentence_idx++;
       char_offset = 0;
-      if (current_line.length > 0 && current_line.length < max_chars) {
-        current_line += " ";
+    } else if (chunk_text.length > 0) {
+      break;
+    } else {
+      var split = split_at_natural_pause(remaining, max_chars, max_rows);
+      chunk_text = split.text;
+      word_count = count_words_in_text(chunk_text);
+      var new_offset = char_offset + leading_spaces + split.end_pos;
+      while (new_offset < sentence.length && sentence[new_offset] === " ") new_offset++;
+      if (new_offset >= sentence.length) {
+        sentence_idx++;
+        char_offset = 0;
+      } else {
+        char_offset = new_offset;
       }
+      break;
     }
   }
 
-  if (current_line.trim().length > 0 && lines.length < max_rows) {
-    lines.push(current_line);
-  } else if (current_line.trim().length > 0 && lines.length >= max_rows) {
-    // overflow — don't advance past what we showed
-  }
-
-  // Apply 30% rule: if a new sentence started on the last line and less than 30% shown, push it back
-  if (last_sentence_start_line >= 0 && last_sentence_start_line === lines.length - 1 && last_sentence_total_words > 0) {
-    var pct_shown = last_sentence_word_count_in_chunk / last_sentence_total_words;
-    if (pct_shown < 0.3) {
-      lines = lines.slice(0, last_sentence_start_line);
-      word_count -= last_sentence_word_count_in_chunk;
-      sentence_idx = last_sentence_idx;
-      char_offset = last_sentence_char_offset;
-    }
-  }
-
+  var lines = layout_to_lines(chunk_text, max_chars, max_rows);
   return {
     lines: lines,
     text: lines.join("\n"),
@@ -229,6 +166,102 @@ function build_one_chunk(sentences, start_sentence, start_char_offset, max_chars
     next_sentence_idx: sentence_idx,
     next_char_offset: char_offset
   };
+}
+
+function layout_to_lines(text, max_chars, max_rows) {
+  var lines = [];
+  var current_line = "";
+  var remaining = text.trim();
+
+  while (remaining.length > 0) {
+    if (lines.length >= max_rows) break;
+    var space_left = max_chars - current_line.length;
+
+    if (space_left <= 0) {
+      lines.push(current_line);
+      current_line = "";
+      continue;
+    }
+
+    var fit = fit_words_in_space(remaining, space_left);
+
+    if (fit.fitted.length === 0) {
+      if (current_line.length > 0) {
+        lines.push(current_line);
+        current_line = "";
+      } else {
+        var hb = hard_break_at(remaining, max_chars);
+        lines.push(hb.fitted);
+        remaining = hb.rest;
+      }
+    } else {
+      current_line = current_line.length > 0 ? current_line + fit.fitted : fit.fitted;
+      remaining = fit.rest;
+    }
+  }
+
+  if (current_line.trim().length > 0 && lines.length < max_rows) {
+    lines.push(current_line);
+  }
+
+  return lines;
+}
+
+function count_rows_for_text(text, max_chars) {
+  return layout_to_lines(text, max_chars, 9999).length;
+}
+
+function split_at_natural_pause(text, max_chars, max_rows) {
+  var breaks = find_natural_break_positions(text);
+
+  for (var i = breaks.length - 1; i >= 0; i--) {
+    var pos = breaks[i];
+    var prefix = text.substring(0, pos).trim();
+    if (prefix.length === 0) continue;
+    if (count_rows_for_text(prefix, max_chars) <= max_rows) {
+      return { text: prefix, end_pos: pos };
+    }
+  }
+
+  var forced_lines = layout_to_lines(text, max_chars, max_rows);
+  var forced_text = forced_lines.join(" ");
+  var end_pos = find_pos_after_words(text, count_words_in_text(forced_text));
+  if (end_pos <= 0) end_pos = text.length;
+  return { text: forced_text, end_pos: end_pos };
+}
+
+function find_natural_break_positions(text) {
+  var positions = [];
+  var i, pos, match;
+
+  for (i = 0; i < text.length; i++) {
+    var ch = text[i];
+    if (ch === "," || ch === ";" || ch === "—" || ch === "–") {
+      pos = i + 1;
+      while (pos < text.length && text[pos] === " ") pos++;
+      if (pos < text.length) positions.push(pos);
+    }
+  }
+
+  var conj_re = /\b(and|but|or|yet|still|so|nor|for|although|while|because|since|if|when|however|though|unless)\b/gi;
+  while ((match = conj_re.exec(text)) !== null) {
+    if (match.index > 0) positions.push(match.index);
+  }
+
+  positions = positions.filter(function (v, idx, a) { return a.indexOf(v) === idx; });
+  positions.sort(function (a, b) { return a - b; });
+  return positions;
+}
+
+function find_pos_after_words(text, n) {
+  var re = /\S+/g;
+  var m, count = 0, last_end = 0;
+  while ((m = re.exec(text)) !== null) {
+    count++;
+    last_end = m.index + m[0].length;
+    if (count >= n) break;
+  }
+  return last_end;
 }
 
 function fit_words_in_space(text, space) {
@@ -361,21 +394,51 @@ function stop_playback() {
   reader_state.playing = false;
   update_play_icon(false);
   clear_timer();
+  stop_tts();
   pause_video();
 }
 
 function schedule_next_chunk() {
   clear_timer();
+  if (tts_state.fallback_timer) {
+    clearTimeout(tts_state.fallback_timer);
+    tts_state.fallback_timer = null;
+  }
   if (!reader_state.playing) return;
-  var duration = get_chunk_duration_ms();
-  reader_state.timer = setTimeout(function () {
-    advance_chunk(1);
-    if (reader_state.playing && reader_state.chunk_index < reader_state.chunks.length) {
-      schedule_next_chunk();
-    } else {
-      stop_playback();
+
+  if (tts_state.enabled) {
+    var advanced = false;
+    var duration = get_chunk_duration_ms();
+    var text = reader_state.chunk_index < reader_state.chunks.length
+      ? reader_state.chunks[reader_state.chunk_index].text
+      : "";
+
+    function on_speech_done() {
+      if (advanced || !reader_state.playing) return;
+      advanced = true;
+      clearTimeout(tts_state.fallback_timer);
+      tts_state.fallback_timer = null;
+      advance_chunk(1);
+      if (reader_state.playing && reader_state.chunk_index < reader_state.chunks.length) {
+        schedule_next_chunk();
+      } else {
+        stop_playback();
+      }
     }
-  }, duration);
+
+    speak_chunk(text, reader_state.speed, on_speech_done);
+    tts_state.fallback_timer = setTimeout(on_speech_done, duration * 2);
+  } else {
+    var wpm_duration = get_chunk_duration_ms();
+    reader_state.timer = setTimeout(function () {
+      advance_chunk(1);
+      if (reader_state.playing && reader_state.chunk_index < reader_state.chunks.length) {
+        schedule_next_chunk();
+      } else {
+        stop_playback();
+      }
+    }, wpm_duration);
+  }
 }
 
 function clear_timer() {
