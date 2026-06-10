@@ -256,6 +256,9 @@ function init_tts_settings() {
   apply_tts_enabled(saved_enabled);
   populate_voice_select(saved_voice);
 
+  var voice_select = document.getElementById("tts-voice-select");
+  if (voice_select) voice_select.addEventListener("change", on_voice_change);
+
   if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.addEventListener("voiceschanged", function () {
       var current = localStorage.getItem("tts_voice") || "";
@@ -296,9 +299,6 @@ function populate_voice_select(saved_voice) {
   });
 
   select.value = saved_voice;
-
-  select.removeEventListener("change", on_voice_change);
-  select.addEventListener("change", on_voice_change);
 }
 
 function on_voice_change() {
