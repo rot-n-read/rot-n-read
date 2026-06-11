@@ -620,22 +620,63 @@ function setup_play_pause() {
   });
 }
 
+function setup_hold_button(btn, on_tap, on_hold_tick) {
+  var hold_timeout = null;
+  var hold_interval = null;
+  var holding = false;
+
+  function start_press(e) {
+    e.preventDefault();
+    holding = false;
+    hold_timeout = setTimeout(function () {
+      holding = true;
+      on_hold_tick();
+      hold_interval = setInterval(on_hold_tick, 500);
+    }, 400);
+  }
+
+  function end_press() {
+    if (hold_timeout) { clearTimeout(hold_timeout); hold_timeout = null; }
+    if (hold_interval) { clearInterval(hold_interval); hold_interval = null; }
+    if (!holding) on_tap();
+    holding = false;
+  }
+
+  function cancel_press() {
+    if (hold_timeout) { clearTimeout(hold_timeout); hold_timeout = null; }
+    if (hold_interval) { clearInterval(hold_interval); hold_interval = null; }
+    holding = false;
+  }
+
+  btn.addEventListener("mousedown", start_press);
+  btn.addEventListener("touchstart", start_press, { passive: false });
+  btn.addEventListener("mouseup", end_press);
+  btn.addEventListener("touchend", end_press);
+  btn.addEventListener("mouseleave", cancel_press);
+  btn.addEventListener("touchcancel", cancel_press);
+}
+
 function setup_rewind_forward() {
   var rewind_btn = document.getElementById("rewind-btn");
   var forward_btn = document.getElementById("forward-btn");
 
-  rewind_btn.addEventListener("click", function () {
-    var skip = get_skip_chunk_count();
-    rewind_chunks(skip);
-  });
+  setup_hold_button(
+    rewind_btn,
+    function () { rewind_chunks(get_skip_chunk_count()); },
+    function () { rewind_chunks(1); }
+  );
 
-  forward_btn.addEventListener("click", function () {
-    var skip = get_skip_chunk_count();
-    advance_chunk(skip);
-    if (reader_state.playing) {
-      schedule_next_chunk();
+  setup_hold_button(
+    forward_btn,
+    function () {
+      advance_chunk(get_skip_chunk_count());
+      if (reader_state.playing) schedule_next_chunk();
+    },
+    function () {
+      advance_chunk(1);
+      if (reader_state.playing) schedule_next_chunk();
     }
-  });
+  );
 }
 
 function setup_speed_control() {

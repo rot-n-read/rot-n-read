@@ -63,6 +63,16 @@
           <span class="settings__hint">Any characters entered here will be stripped from the text</span>
         </div>
 
+        <div class="settings__group" id="progress-group">
+          <label class="settings__label">Progress</label>
+          <div class="book-options__progress-preview" id="progress-preview"></div>
+          <input type="range" class="book-options__progress-slider" id="progress-slider" min="0" max="100" value="0" step="1">
+          <div class="book-options__progress-meta">
+            <span id="progress-label-from">0%</span>
+            <span id="progress-label-total"></span>
+          </div>
+        </div>
+
         <div class="settings__group">
           <label class="settings__label">Storage</label>
           <div class="book-options__storage" id="storage-info">
@@ -77,6 +87,16 @@
         <button class="book-options__delete-btn" id="delete-btn">Delete Book</button>
       </section>
     </main>
+
+    <div class="book-options__modal hidden" id="progress-modal">
+      <div class="book-options__modal-content">
+        <p class="book-options__modal-text" id="progress-modal-text">Change progress?</p>
+        <div class="book-options__modal-actions">
+          <button class="book-options__modal-btn book-options__modal-btn--cancel" id="progress-modal-cancel">Cancel</button>
+          <button class="book-options__modal-btn book-options__modal-btn--confirm book-options__modal-btn--progress" id="progress-modal-confirm">Confirm</button>
+        </div>
+      </div>
+    </div>
 
     <div class="book-options__modal hidden" id="delete-modal">
       <div class="book-options__modal-content">

@@ -1430,6 +1430,41 @@ body {
   border-color: #ef4444;
 }
 
+.book-options__modal-btn--progress {
+  background: var(--border);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.book-options__progress-preview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text);
+  opacity: 0.8;
+  min-height: 3rem;
+  word-break: break-word;
+  margin-bottom: 0.5rem;
+}
+
+.book-options__progress-slider {
+  width: 100%;
+  accent-color: var(--text);
+  cursor: pointer;
+  height: 1.25rem;
+}
+
+.book-options__progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-top: 0.25rem;
+}
+
 /* ===== UNSUPPORTED PAGE ===== */
 .unsupported {
   display: flex;

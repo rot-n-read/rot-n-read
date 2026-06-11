@@ -34,6 +34,7 @@ function load_book_for_options(book_id) {
     book_options_state.selected_color = book.color || get_random_color();
     populate_fields(book);
     setup_color_picker();
+    setup_progress_slider();
     setup_save();
     setup_delete();
   });
@@ -132,6 +133,108 @@ function setup_save() {
     save_book(book).then(function () {
       window.location.href = "home.html";
     });
+  });
+}
+
+function count_words_in_text(text) {
+  var t = text.trim();
+  return t.length === 0 ? 0 : t.split(/\s+/).length;
+}
+
+function get_total_words_from_sentences(sentences) {
+  var total = 0;
+  for (var i = 0; i < sentences.length; i++) {
+    total += count_words_in_text(sentences[i]);
+  }
+  return total;
+}
+
+function get_text_at_word_offset(sentences, target_offset) {
+  var cumulative = 0;
+  for (var i = 0; i < sentences.length; i++) {
+    var wc = count_words_in_text(sentences[i]);
+    if (cumulative + wc > target_offset || i === sentences.length - 1) {
+      return sentences[i].trim();
+    }
+    cumulative += wc;
+  }
+  return "";
+}
+
+function setup_progress_slider() {
+  var book = book_options_state.book;
+  var sentences = book.sentences || [];
+  if (sentences.length === 0) {
+    var group = document.getElementById("progress-group");
+    if (group) group.style.display = "none";
+    return;
+  }
+
+  var total_words = get_total_words_from_sentences(sentences);
+  var current_offset = book.word_offset || 0;
+  var current_percent = total_words > 0 ? Math.round((current_offset / total_words) * 100) : 0;
+
+  var slider = document.getElementById("progress-slider");
+  var preview = document.getElementById("progress-preview");
+  var label_from = document.getElementById("progress-label-from");
+  var label_total = document.getElementById("progress-label-total");
+  var modal = document.getElementById("progress-modal");
+  var modal_text = document.getElementById("progress-modal-text");
+  var modal_cancel = document.getElementById("progress-modal-cancel");
+  var modal_confirm = document.getElementById("progress-modal-confirm");
+
+  slider.value = current_percent;
+  label_from.textContent = current_percent + "%";
+  label_total.textContent = total_words.toLocaleString() + " words";
+
+  var pending_percent = current_percent;
+
+  function update_preview(percent) {
+    var target_offset = Math.floor((percent / 100) * total_words);
+    var text = get_text_at_word_offset(sentences, target_offset);
+    var truncated = text.length > 160 ? text.slice(0, 160) + "…" : text;
+    preview.textContent = truncated || "—";
+  }
+
+  update_preview(current_percent);
+
+  slider.addEventListener("input", function () {
+    var new_percent = parseInt(slider.value, 10);
+    label_from.textContent = new_percent + "%";
+    update_preview(new_percent);
+    pending_percent = new_percent;
+  });
+
+  slider.addEventListener("change", function () {
+    if (pending_percent === current_percent) return;
+    modal_text.textContent = "Change progress from " + current_percent + "% to " + pending_percent + "?";
+    modal.classList.remove("hidden");
+  });
+
+  modal_cancel.addEventListener("click", function () {
+    modal.classList.add("hidden");
+    slider.value = current_percent;
+    label_from.textContent = current_percent + "%";
+    update_preview(current_percent);
+  });
+
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) {
+      modal.classList.add("hidden");
+      slider.value = current_percent;
+      label_from.textContent = current_percent + "%";
+      update_preview(current_percent);
+    }
+  });
+
+  modal_confirm.addEventListener("click", function () {
+    var new_word_offset = Math.floor((pending_percent / 100) * total_words);
+    book_options_state.book.word_offset = new_word_offset;
+    book_options_state.book.percent = pending_percent;
+    current_percent = pending_percent;
+    update_book_progress(book_options_state.book.id, new_word_offset, pending_percent);
+    modal.classList.add("hidden");
+    label_from.textContent = current_percent + "%";
   });
 }
 
