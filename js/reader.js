@@ -34,6 +34,7 @@ function init_reader() {
   listen_orientation_change();
   setup_zen_mode();
   setup_reset_button();
+  setup_wake_lock_visibility();
 }
 
 function get_book_id_from_url() {
@@ -386,6 +387,7 @@ function start_playback() {
   if (reader_state.chunk_index >= reader_state.chunks.length) return;
   reader_state.playing = true;
   update_play_icon(true);
+  acquire_wake_lock();
   start_video();
   schedule_next_chunk();
 }
@@ -396,6 +398,7 @@ function stop_playback() {
   clear_timer();
   stop_tts();
   pause_video();
+  release_wake_lock();
 }
 
 function schedule_next_chunk() {
@@ -709,6 +712,32 @@ function setup_speed_control() {
   });
 
   update_speed_display();
+}
+
+/* ─── Wake lock ─── */
+
+var _wake_lock = null;
+
+async function acquire_wake_lock() {
+  if (!("wakeLock" in navigator)) return;
+  try {
+    _wake_lock = await navigator.wakeLock.request("screen");
+  } catch (_) {}
+}
+
+function release_wake_lock() {
+  if (_wake_lock) {
+    _wake_lock.release();
+    _wake_lock = null;
+  }
+}
+
+function setup_wake_lock_visibility() {
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && reader_state.playing) {
+      acquire_wake_lock();
+    }
+  });
 }
 
 document.addEventListener("DOMContentLoaded", init_reader);
